@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('JobQuest — Kanban Board')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div th:replace="~{fragments/layout :: toast}"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     KANBAN BOARD PAGE
+     Displays applications in drag-and-drop columns by status.
+     Uses the Drag and Drop API to move cards between columns,
+     calling the PATCH /api/applications/{id}/status endpoint.
+     ═══════════════════════════════════════════════════════════════ -->
+<main class="main-content">
+    <div class="container-fluid px-4">
+
+        <div class="page-header">
+            <div>
+                <h1><i class="bi bi-kanban"></i> Kanban Board</h1>
+                <p class="text-muted">Drag and drop to update application status</p>
+            </div>
+            <a th:href="@{/applications/new}" class="btn btn-primary-gradient btn-lg">
+                <i class="bi bi-plus-circle"></i> Add Application
+            </a>
+        </div>
+
+        <!-- Kanban Columns -->
+        <div class="kanban-board">
+            <div th:each="status : ${statuses}" class="kanban-column"
+                 th:attr="data-status=${status}">
+                <div class="kanban-column-header"
+                     th:classappend="'kanban-header-' + ${#strings.toLowerCase(#strings.replace(status, ' ', '-'))}">
+                    <span th:text="${status}">Status</span>
+                    <span class="kanban-count"
+                          th:text="${#lists.size(applications.?[status == __${status}__])}">0</span>
+                </div>
+                <div class="kanban-cards" th:attr="data-status=${status}">
+                    <div th:each="app : ${applications}"
+                         th:if="${app.status == status}"
+                         class="kanban-card"
+                         draggable="true"
+                         th:attr="data-id=${app.id}">
+                        <div class="kanban-card-company" th:text="${app.companyName}">Company</div>
+                        <div class="kanban-card-role" th:text="${app.role}">Role</div>
+                        <div class="kanban-card-meta">
+                            <span class="text-muted small" th:text="${app.dateApplied}">Date</span>
+                            <span class="badge bg-secondary" th:text="${app.daysSinceApplied} + 'd'">0d</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script th:src="@{/js/kanban.js}"></script>
+</body>
+</html>

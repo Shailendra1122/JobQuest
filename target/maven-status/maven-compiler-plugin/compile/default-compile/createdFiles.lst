@@ -1,0 +1,7 @@
+com\jobquest\controller\JobApplicationController.class
+com\jobquest\controller\JobApplicationApiController.class
+com\jobquest\JobQuestApplication.class
+com\jobquest\config\WebConfig.class
+com\jobquest\model\JobApplication.class
+com\jobquest\service\JobApplicationService.class
+com\jobquest\repository\JobApplicationRepository.class

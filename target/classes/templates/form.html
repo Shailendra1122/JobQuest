@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('JobQuest — ' + ${pageTitle})}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div th:replace="~{fragments/layout :: toast}"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     ADD / EDIT APPLICATION FORM
+     This template is shared for both add and edit operations.
+     When editing, the form is pre-filled with existing data.
+     ═══════════════════════════════════════════════════════════════ -->
+<main class="main-content">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div>
+                        <h1>
+                            <i class="bi" th:classappend="${application.id == null} ? 'bi-plus-circle' : 'bi-pencil-square'"></i>
+                            <span th:text="${pageTitle}">Form</span>
+                        </h1>
+                        <p class="text-muted"
+                           th:text="${application.id == null} ? 'Add a new job application' : 'Update application details'">
+                        </p>
+                    </div>
+                </div>
+
+                <!-- ── Form Card ─────────────────────────────────── -->
+                <div class="glass-card">
+                    <form th:action="${application.id == null}
+                                     ? @{/applications}
+                                     : @{/applications/edit/{id}(id=${application.id})}"
+                          th:object="${application}"
+                          method="post"
+                          class="needs-validation" novalidate>
+
+                        <!-- Company Name -->
+                        <div class="mb-4">
+                            <label for="companyName" class="form-label">
+                                <i class="bi bi-building"></i> Company Name *
+                            </label>
+                            <input type="text" id="companyName" th:field="*{companyName}"
+                                   class="form-control form-control-lg"
+                                   placeholder="e.g. Google, Microsoft, Amazon"
+                                   required/>
+                            <div th:if="${#fields.hasErrors('companyName')}" class="invalid-feedback d-block">
+                                <span th:errors="*{companyName}">Error</span>
+                            </div>
+                        </div>
+
+                        <!-- Role -->
+                        <div class="mb-4">
+                            <label for="role" class="form-label">
+                                <i class="bi bi-person-badge"></i> Role / Position *
+                            </label>
+                            <input type="text" id="role" th:field="*{role}"
+                                   class="form-control form-control-lg"
+                                   placeholder="e.g. Software Engineer Intern"
+                                   required/>
+                            <div th:if="${#fields.hasErrors('role')}" class="invalid-feedback d-block">
+                                <span th:errors="*{role}">Error</span>
+                            </div>
+                        </div>
+
+                        <div class="row g-4">
+                            <!-- Date Applied -->
+                            <div class="col-md-6 mb-4">
+                                <label for="dateApplied" class="form-label">
+                                    <i class="bi bi-calendar-event"></i> Date Applied
+                                </label>
+                                <input type="date" id="dateApplied" th:field="*{dateApplied}"
+                                       class="form-control form-control-lg"/>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-md-6 mb-4">
+                                <label for="status" class="form-label">
+                                    <i class="bi bi-flag"></i> Status
+                                </label>
+                                <select id="status" th:field="*{status}" class="form-select form-select-lg">
+                                    <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}">Status</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Job Link -->
+                        <div class="mb-4">
+                            <label for="jobLink" class="form-label">
+                                <i class="bi bi-link-45deg"></i> Job Posting Link
+                            </label>
+                            <input type="url" id="jobLink" th:field="*{jobLink}"
+                                   class="form-control form-control-lg"
+                                   placeholder="https://careers.company.com/job/12345"/>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="mb-4">
+                            <label for="notes" class="form-label">
+                                <i class="bi bi-journal-text"></i> Notes
+                            </label>
+                            <textarea id="notes" th:field="*{notes}"
+                                      class="form-control" rows="4"
+                                      placeholder="Interview prep notes, contact info, etc."></textarea>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn btn-primary-gradient btn-lg flex-fill">
+                                <i class="bi" th:classappend="${application.id == null} ? 'bi-check-circle' : 'bi-save'"></i>
+                                <span th:text="${application.id == null} ? 'Add Application' : 'Save Changes'">Submit</span>
+                            </button>
+                            <a th:href="@{/applications}" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- ── File Upload Section (only when editing) ─── -->
+                <div th:if="${application.id != null}" class="glass-card mt-4">
+                    <h5 class="card-title">
+                        <i class="bi bi-cloud-upload"></i> Attach Documents
+                    </h5>
+                    <form th:action="@{/applications/{id}/upload(id=${application.id})}"
+                          method="post" enctype="multipart/form-data">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Resume</label>
+                                <input type="file" name="resume" class="form-control"
+                                       accept=".pdf,.doc,.docx"/>
+                                <div th:if="${application.resumePath != null}" class="mt-2">
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle"></i> Uploaded
+                                    </span>
+                                    <a th:href="@{'/uploads/' + ${application.resumePath}}"
+                                       target="_blank" class="ms-2 small">View</a>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Cover Letter</label>
+                                <input type="file" name="coverLetter" class="form-control"
+                                       accept=".pdf,.doc,.docx"/>
+                                <div th:if="${application.coverLetterPath != null}" class="mt-2">
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle"></i> Uploaded
+                                    </span>
+                                    <a th:href="@{'/uploads/' + ${application.coverLetterPath}}"
+                                       target="_blank" class="ms-2 small">View</a>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-outline-primary mt-3">
+                            <i class="bi bi-upload"></i> Upload Files
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

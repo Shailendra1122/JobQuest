@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('JobQuest — Applications')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div th:replace="~{fragments/layout :: toast}"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     APPLICATION LIST PAGE
+     Filterable table of all job applications with CRUD actions.
+     ═══════════════════════════════════════════════════════════════ -->
+<main class="main-content">
+    <div class="container">
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1><i class="bi bi-list-ul"></i> Applications</h1>
+                <p class="text-muted">Manage all your job applications</p>
+            </div>
+            <a th:href="@{/applications/new}" class="btn btn-primary-gradient btn-lg">
+                <i class="bi bi-plus-circle"></i> Add Application
+            </a>
+        </div>
+
+        <!-- ── Filters ───────────────────────────────────────────── -->
+        <div class="glass-card mb-4">
+            <form th:action="@{/applications}" method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label"><i class="bi bi-funnel"></i> Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">All Statuses</option>
+                        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}"
+                                th:selected="${s == selectedStatus}">Status</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label"><i class="bi bi-search"></i> Company</label>
+                    <input type="text" name="company" class="form-control"
+                           placeholder="Search company..."
+                           th:value="${selectedCompany}"/>
+                </div>
+                <div class="col-md-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary-gradient flex-fill">
+                        <i class="bi bi-filter"></i> Filter
+                    </button>
+                    <a th:href="@{/applications}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Clear
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- ── Applications Table ────────────────────────────────── -->
+        <div class="glass-card">
+            <div th:if="${#lists.isEmpty(applications)}" class="text-center py-5">
+                <i class="bi bi-inbox" style="font-size:3rem;color:var(--accent-primary)"></i>
+                <h5 class="mt-3">No applications found</h5>
+                <p class="text-muted">Try adjusting your filters or add a new application.</p>
+                <a th:href="@{/applications/new}" class="btn btn-primary-gradient">
+                    <i class="bi bi-plus-circle"></i> Add Your First Application
+                </a>
+            </div>
+
+            <div class="table-responsive" th:if="${!#lists.isEmpty(applications)}">
+                <table class="table table-borderless table-hover align-middle" id="applicationsTable">
+                    <thead>
+                        <tr>
+                            <th>Company</th>
+                            <th>Role</th>
+                            <th>Date Applied</th>
+                            <th>Status</th>
+                            <th>Days</th>
+                            <th>Link</th>
+                            <th>Docs</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="app : ${applications}" class="app-row">
+                            <td>
+                                <strong th:text="${app.companyName}">Company</strong>
+                            </td>
+                            <td th:text="${app.role}">Role</td>
+                            <td th:text="${app.dateApplied}">Date</td>
+                            <td>
+                                <span class="status-badge"
+                                      th:classappend="'status-' + ${#strings.toLowerCase(#strings.replace(app.status, ' ', '-'))}"
+                                      th:text="${app.status}">Status</span>
+                            </td>
+                            <td>
+                                <span class="text-muted" th:text="${app.daysSinceApplied} + 'd'">0d</span>
+                            </td>
+                            <td>
+                                <a th:if="${app.jobLink != null and !app.jobLink.isEmpty()}"
+                                   th:href="${app.jobLink}" target="_blank"
+                                   class="btn btn-sm btn-outline-info">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                </a>
+                                <span th:if="${app.jobLink == null or app.jobLink.isEmpty()}"
+                                      class="text-muted">—</span>
+                            </td>
+                            <td>
+                                <span th:if="${app.resumePath != null}" class="badge bg-info me-1"
+                                      title="Resume attached"><i class="bi bi-file-earmark-text"></i></span>
+                                <span th:if="${app.coverLetterPath != null}" class="badge bg-secondary"
+                                      title="Cover letter attached"><i class="bi bi-file-earmark-richtext"></i></span>
+                                <span th:if="${app.resumePath == null and app.coverLetterPath == null}"
+                                      class="text-muted">—</span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <a th:href="@{/applications/edit/{id}(id=${app.id})}"
+                                       class="btn btn-sm btn-outline-primary" title="Edit">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a th:href="@{/applications/delete/{id}(id=${app.id})}"
+                                       class="btn btn-sm btn-outline-danger"
+                                       title="Delete"
+                                       onclick="return confirm('Delete this application?')">
+                                        <i class="bi bi-trash3"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('JobQuest — Dashboard')}"></head>
+<body>
+
+<!-- Navigation -->
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<!-- Toast notifications -->
+<div th:replace="~{fragments/layout :: toast}"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     DASHBOARD PAGE
+     Shows summary stat cards, interview alerts, and recent applications.
+     ═══════════════════════════════════════════════════════════════ -->
+<main class="main-content">
+    <div class="container">
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1><i class="bi bi-speedometer2"></i> Dashboard</h1>
+                <p class="text-muted">Your job search at a glance</p>
+            </div>
+            <a th:href="@{/applications/new}" class="btn btn-primary-gradient btn-lg">
+                <i class="bi bi-plus-circle"></i> Add Application
+            </a>
+        </div>
+
+        <!-- ── Stat Cards ────────────────────────────────────────── -->
+        <div class="row g-4 mb-5">
+            <!-- Total Applications -->
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card stat-card-total">
+                    <div class="stat-icon"><i class="bi bi-briefcase-fill"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-number" th:text="${stats.total}">0</span>
+                        <span class="stat-label">Total Applications</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Active Interviews -->
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card stat-card-interview">
+                    <div class="stat-icon"><i class="bi bi-camera-video-fill"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-number" th:text="${stats.interviewing}">0</span>
+                        <span class="stat-label">Active Interviews</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Offers -->
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card stat-card-offer">
+                    <div class="stat-icon"><i class="bi bi-trophy-fill"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-number" th:text="${stats.offers}">0</span>
+                        <span class="stat-label">Offers Received</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Rejections -->
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card stat-card-rejected">
+                    <div class="stat-icon"><i class="bi bi-x-circle-fill"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-number" th:text="${stats.rejected}">0</span>
+                        <span class="stat-label">Rejections</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- ── Interview Alerts ──────────────────────────────── -->
+            <div class="col-lg-4">
+                <div class="glass-card">
+                    <h5 class="card-title">
+                        <i class="bi bi-bell-fill text-warning"></i> Interview Alerts
+                    </h5>
+                    <div th:if="${#lists.isEmpty(interviewAlerts)}" class="text-muted text-center py-4">
+                        <i class="bi bi-emoji-smile" style="font-size:2rem"></i>
+                        <p class="mt-2">No active interviews</p>
+                    </div>
+                    <div th:each="app : ${interviewAlerts}" class="alert-item">
+                        <div class="alert-company">
+                            <i class="bi bi-building"></i>
+                            <span th:text="${app.companyName}">Company</span>
+                        </div>
+                        <div class="alert-role" th:text="${app.role}">Role</div>
+                        <div class="alert-days">
+                            <span class="badge bg-warning text-dark">
+                                <span th:text="${app.daysSinceApplied}">0</span> days ago
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Recent Applications ───────────────────────────── -->
+            <div class="col-lg-8">
+                <div class="glass-card">
+                    <h5 class="card-title">
+                        <i class="bi bi-clock-history"></i> Recent Applications
+                    </h5>
+                    <div th:if="${#lists.isEmpty(recentApps)}" class="text-muted text-center py-4">
+                        <i class="bi bi-inbox" style="font-size:2rem"></i>
+                        <p class="mt-2">No applications yet. Start adding!</p>
+                    </div>
+                    <div class="table-responsive" th:if="${!#lists.isEmpty(recentApps)}">
+                        <table class="table table-borderless table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Company</th>
+                                    <th>Role</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Days</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="app : ${recentApps}">
+                                    <td>
+                                        <strong th:text="${app.companyName}">Company</strong>
+                                    </td>
+                                    <td th:text="${app.role}">Role</td>
+                                    <td th:text="${app.dateApplied}">Date</td>
+                                    <td>
+                                        <span class="status-badge"
+                                              th:classappend="'status-' + ${#strings.toLowerCase(#strings.replace(app.status, ' ', '-'))}"
+                                              th:text="${app.status}">Status</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted" th:text="${app.daysSinceApplied} + 'd'">0d</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
