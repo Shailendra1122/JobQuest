@@ -96,7 +96,7 @@ mvn spring-boot:run
 ### 3️⃣ Open in Browser
 
 ```
-🌐 https://job-quest-eosin.vercel.app/
+🌐 [https://job-quest-eosin.vercel.app/](https://jobquest-gqlq.onrender.com)
 ```
 
 > 💡 **That's it!** No database setup, no environment variables, no Docker. SQLite creates the `jobquest.db` file automatically on first run, pre-loaded with sample data.
