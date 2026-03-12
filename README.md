@@ -15,7 +15,6 @@
   <img src="https://img.shields.io/badge/SQLite-07405E?style=flat-square&logo=sqlite&logoColor=white" />
   <img src="https://img.shields.io/badge/Thymeleaf-005F0F?style=flat-square&logo=thymeleaf&logoColor=white" />
   <img src="https://img.shields.io/badge/Bootstrap-5.3-7952B3?style=flat-square&logo=bootstrap&logoColor=white" />
-  <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" />
 </p>
 
 ---
@@ -216,11 +215,6 @@ Contributions are welcome! Here's how to get involved:
 
 ---
 
-## 📜 License
-
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
-
----
 
 <p align="center">
   <b>Built with ❤️ by <a href="https://github.com/Shailendra1122">Shailendra</a></b>
