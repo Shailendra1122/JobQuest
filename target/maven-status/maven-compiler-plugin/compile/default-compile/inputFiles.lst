@@ -1,7 +1,13 @@
-D:\Github\JobQuest\src\main\java\com\jobquest\controller\JobApplicationApiController.java
-D:\Github\JobQuest\src\main\java\com\jobquest\service\JobApplicationService.java
 D:\Github\JobQuest\src\main\java\com\jobquest\repository\JobApplicationRepository.java
-D:\Github\JobQuest\src\main\java\com\jobquest\config\WebConfig.java
 D:\Github\JobQuest\src\main\java\com\jobquest\controller\JobApplicationController.java
 D:\Github\JobQuest\src\main\java\com\jobquest\JobQuestApplication.java
+D:\Github\JobQuest\src\main\java\com\jobquest\config\SecurityConfig.java
+D:\Github\JobQuest\src\main\java\com\jobquest\controller\JobApplicationApiController.java
+D:\Github\JobQuest\src\main\java\com\jobquest\service\JobApplicationService.java
+D:\Github\JobQuest\src\main\java\com\jobquest\config\PasswordEncoderConfig.java
+D:\Github\JobQuest\src\main\java\com\jobquest\config\WebConfig.java
+D:\Github\JobQuest\src\main\java\com\jobquest\model\User.java
+D:\Github\JobQuest\src\main\java\com\jobquest\repository\UserRepository.java
 D:\Github\JobQuest\src\main\java\com\jobquest\model\JobApplication.java
+D:\Github\JobQuest\src\main\java\com\jobquest\service\UserService.java
+D:\Github\JobQuest\src\main\java\com\jobquest\controller\AuthController.java

@@ -1,8 +1,12 @@
 package com.jobquest.service;
 
 import com.jobquest.model.JobApplication;
+import com.jobquest.model.User;
 import com.jobquest.repository.JobApplicationRepository;
+import com.jobquest.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,16 +19,20 @@ import java.util.*;
  *
  * Encapsulates CRUD, filtering, statistics computation,
  * and file-upload handling so the controllers stay thin.
+ * All operations are scoped to the currently authenticated user.
  */
 @Service
 public class JobApplicationService {
 
     private final JobApplicationRepository repository;
+    private final UserRepository userRepository;
     private final Path uploadDir;
 
     public JobApplicationService(JobApplicationRepository repository,
+            UserRepository userRepository,
             @Value("${file.upload-dir:uploads}") String uploadDir) {
         this.repository = repository;
+        this.userRepository = userRepository;
         this.uploadDir = Paths.get(uploadDir);
         // Ensure the upload directory exists on startup
         try {
@@ -34,21 +42,55 @@ public class JobApplicationService {
         }
     }
 
+    // ── User Context ─────────────────────────────────────────────
+
+    /** Get the currently authenticated user's ID. */
+    public Long getCurrentUserId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            return null;
+        }
+        String username = auth.getName();
+        User user = userRepository.findByUsername(username).orElse(null);
+        return user != null ? user.getId() : null;
+    }
+
+    /** Get the currently authenticated user. */
+    public User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            return null;
+        }
+        return userRepository.findByUsername(auth.getName()).orElse(null);
+    }
+
     // ── CRUD ──────────────────────────────────────────────────────
 
-    /** Return every application in the database. */
+    /** Return every application belonging to the current user. */
     public List<JobApplication> findAll() {
-        return repository.findAll();
+        Long userId = getCurrentUserId();
+        if (userId == null) return Collections.emptyList();
+        return repository.findByUserId(userId);
     }
 
-    /** Find a single application by its ID; throws if not found. */
+    /** Find a single application by its ID; throws if not found or not owned. */
     public JobApplication findById(Long id) {
-        return repository.findById(id)
+        JobApplication app = repository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Application not found with id: " + id));
+        // Ensure the current user owns this application
+        Long userId = getCurrentUserId();
+        if (userId != null && !userId.equals(app.getUserId())) {
+            throw new NoSuchElementException("Application not found with id: " + id);
+        }
+        return app;
     }
 
-    /** Persist a new application. */
+    /** Persist a new application, associating it with the current user. */
     public JobApplication save(JobApplication application) {
+        Long userId = getCurrentUserId();
+        if (userId != null) {
+            application.setUserId(userId);
+        }
         return repository.save(application);
     }
 
@@ -64,8 +106,10 @@ public class JobApplicationService {
         return repository.save(existing);
     }
 
-    /** Delete an application by ID. */
+    /** Delete an application by ID (only if owned by current user). */
     public void delete(Long id) {
+        // Verify ownership first
+        findById(id);
         repository.deleteById(id);
     }
 
@@ -74,60 +118,82 @@ public class JobApplicationService {
     /**
      * Filter applications by status and/or company name.
      * Both parameters are optional — pass null or empty to skip that filter.
+     * Results are scoped to the current user.
      */
     public List<JobApplication> filter(String status, String company) {
+        Long userId = getCurrentUserId();
+        if (userId == null) return Collections.emptyList();
+
         boolean hasStatus = status != null && !status.isBlank();
         boolean hasCompany = company != null && !company.isBlank();
 
         if (hasStatus && hasCompany) {
-            return repository.findByStatusAndCompanyNameContainingIgnoreCase(status, company);
+            return repository.findByUserIdAndStatusAndCompanyNameContainingIgnoreCase(userId, status, company);
         } else if (hasStatus) {
-            return repository.findByStatus(status);
+            return repository.findByUserIdAndStatus(userId, status);
         } else if (hasCompany) {
-            return repository.findByCompanyNameContainingIgnoreCase(company);
+            return repository.findByUserIdAndCompanyNameContainingIgnoreCase(userId, company);
         }
-        return repository.findAll();
+        return repository.findByUserId(userId);
     }
 
     // ── Dashboard Stats ───────────────────────────────────────────
 
-    /** Build a map of dashboard statistics. */
+    /** Build a map of dashboard statistics for the current user. */
     public Map<String, Object> getDashboardStats() {
+        Long userId = getCurrentUserId();
         Map<String, Object> stats = new LinkedHashMap<>();
-        stats.put("total", repository.count());
-        stats.put("interviewing", repository.countByStatus("Interviewing"));
-        stats.put("offers", repository.countByStatus("Offer"));
-        stats.put("rejected", repository.countByStatus("Rejected"));
-        stats.put("applied", repository.countByStatus("Applied"));
-        stats.put("oa", repository.countByStatus("Online Assessment"));
+        if (userId == null) {
+            stats.put("total", 0L);
+            stats.put("interviewing", 0L);
+            stats.put("offers", 0L);
+            stats.put("rejected", 0L);
+            stats.put("applied", 0L);
+            stats.put("oa", 0L);
+            return stats;
+        }
+        stats.put("total", repository.countByUserId(userId));
+        stats.put("interviewing", repository.countByUserIdAndStatus(userId, "Interviewing"));
+        stats.put("offers", repository.countByUserIdAndStatus(userId, "Offer"));
+        stats.put("rejected", repository.countByUserIdAndStatus(userId, "Rejected"));
+        stats.put("applied", repository.countByUserIdAndStatus(userId, "Applied"));
+        stats.put("oa", repository.countByUserIdAndStatus(userId, "Online Assessment"));
         return stats;
     }
 
-    /** Get the 10 most recent applications. */
+    /** Get the 10 most recent applications for the current user. */
     public List<JobApplication> getRecentApplications() {
-        return repository.findTop10ByOrderByDateAppliedDesc();
+        Long userId = getCurrentUserId();
+        if (userId == null) return Collections.emptyList();
+        return repository.findTop10ByUserIdOrderByDateAppliedDesc(userId);
     }
 
-    /** Get all applications currently in "Interviewing" status. */
+    /** Get all applications currently in "Interviewing" status for the current user. */
     public List<JobApplication> getInterviewAlerts() {
-        return repository.findByStatusOrderByDateAppliedDesc("Interviewing");
+        Long userId = getCurrentUserId();
+        if (userId == null) return Collections.emptyList();
+        return repository.findByUserIdAndStatusOrderByDateAppliedDesc(userId, "Interviewing");
     }
 
     // ── Analytics ─────────────────────────────────────────────────
 
-    /** Monthly application counts: {"2026-01": 5, "2026-02": 8, ...} */
+    /** Monthly application counts for the current user. */
     public Map<String, Long> getMonthlyApplicationCounts() {
+        Long userId = getCurrentUserId();
         Map<String, Long> result = new LinkedHashMap<>();
-        for (Object[] row : repository.countApplicationsByMonth()) {
+        if (userId == null) return result;
+        for (Object[] row : repository.countApplicationsByMonthAndUserId(userId)) {
             result.put((String) row[0], ((Number) row[1]).longValue());
         }
         return result;
     }
 
-    /** Status distribution: {"Applied": 12, "Offer": 3, ...} */
+    /** Status distribution for the current user. */
     public Map<String, Long> getStatusDistribution() {
+        Long userId = getCurrentUserId();
         Map<String, Long> result = new LinkedHashMap<>();
-        for (Object[] row : repository.countByStatusGroup()) {
+        if (userId == null) return result;
+        for (Object[] row : repository.countByStatusGroupAndUserId(userId)) {
             result.put((String) row[0], ((Number) row[1]).longValue());
         }
         return result;

@@ -1,5 +1,6 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
   <!-- ═══════════════════════════════════════════════════════════════
      Reusable layout fragment used by every page.
      Contains the <head>, navigation bar, toast notifications,
@@ -83,6 +84,23 @@
               >
                 <i class="bi bi-plus-circle"></i> Add New
               </a>
+            </li>
+            <!-- User dropdown -->
+            <li class="nav-item dropdown ms-3">
+              <a class="nav-link dropdown-toggle user-dropdown" href="#"
+                 role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-person-circle"></i>
+                <span th:text="${#authentication.name}" class="ms-1">User</span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark">
+                <li>
+                  <form th:action="@{/logout}" method="post" class="px-0 m-0">
+                    <button type="submit" class="dropdown-item text-danger">
+                      <i class="bi bi-box-arrow-right me-2"></i>Logout
+                    </button>
+                  </form>
+                </li>
+              </ul>
             </li>
           </ul>
         </div>

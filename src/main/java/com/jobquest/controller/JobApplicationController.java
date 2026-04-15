@@ -44,6 +44,11 @@ public class JobApplicationController {
         model.addAttribute("stats", service.getDashboardStats());
         model.addAttribute("recentApps", service.getRecentApplications());
         model.addAttribute("interviewAlerts", service.getInterviewAlerts());
+        // Add user display name for greeting
+        var currentUser = service.getCurrentUser();
+        if (currentUser != null) {
+            model.addAttribute("displayName", currentUser.getDisplayName());
+        }
         return "dashboard";
     }
 

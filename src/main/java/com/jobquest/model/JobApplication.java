@@ -53,6 +53,10 @@ public class JobApplication {
     @Column(name = "cover_letter_path")
     private String coverLetterPath;
 
+    /** The ID of the user who owns this application. */
+    @Column(name = "user_id")
+    private Long userId;
+
     // ── Constructors ──────────────────────────────────────────────
 
     public JobApplication() {
@@ -158,5 +162,13 @@ public class JobApplication {
 
     public void setCoverLetterPath(String coverLetterPath) {
         this.coverLetterPath = coverLetterPath;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 }

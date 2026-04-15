@@ -162,6 +162,46 @@ body {
   transform: translateY(-1px);
 }
 
+/* ── User Dropdown ─────────────────────────────────────────────── */
+.user-dropdown {
+  display: flex !important;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem !important;
+  border: 1px solid var(--glass-border);
+  border-radius: 100px;
+  font-weight: 500;
+}
+
+.user-dropdown:hover {
+  border-color: var(--accent-primary);
+  background: rgba(99, 102, 241, 0.08) !important;
+}
+
+.user-dropdown i.bi-person-circle {
+  font-size: 1.2rem;
+  color: var(--accent-primary);
+}
+
+.dropdown-menu-dark {
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  min-width: 160px;
+  margin-top: 0.5rem !important;
+}
+
+.dropdown-menu-dark .dropdown-item {
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+
+.dropdown-menu-dark .dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
 /* ── Page Header ───────────────────────────────────────────────── */
 .page-header {
   display: flex;
