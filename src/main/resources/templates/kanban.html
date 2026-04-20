@@ -33,7 +33,7 @@
                      th:classappend="'kanban-header-' + ${#strings.toLowerCase(#strings.replace(status, ' ', '-'))}">
                     <span th:text="${status}">Status</span>
                     <span class="kanban-count"
-                          th:text="${#lists.size(applications.?[status == __${status}__])}">0</span>
+                          th:text="${#lists.size(applications.?[status == '__${status}__'])}">0</span>
                 </div>
                 <div class="kanban-cards" th:attr="data-status=${status}">
                     <div th:each="app : ${applications}"

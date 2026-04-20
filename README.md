@@ -31,6 +31,7 @@ Sound familiar? **JobQuest** eliminates the chaos. No more spreadsheets from hel
 
 | Feature | Description |
 |:--|:--|
+| 🔐 **Secure Access** | Personal accounts with registration/login. Every user gets a private workspace built on Spring Security. |
 | 📊 **Smart Dashboard** | Bird's-eye view of your entire job hunt — total apps, interviews, offers, rejections — all in real time |
 | 📋 **Application Manager** | Full CRUD with filtering by status & company name. Never lose track of an application again |
 | 🗂️ **Kanban Board** | Drag-and-drop your applications across stages: `Applied → OA → Interviewing → Offer / Rejected` |
@@ -98,7 +99,7 @@ mvn spring-boot:run
 🌐 [https://jobquest-gqlq.onrender.com](https://jobquest-gqlq.onrender.com)
 ```
 
-> 💡 **That's it!** No database setup, no environment variables, no Docker. SQLite creates the `jobquest.db` file automatically on first run, pre-loaded with sample data.
+> 💡 **That's it!** No database setup, no environment variables, no Docker. SQLite creates the `jobquest.db` file automatically on first run. Register an account and start tracking immediately!
 
 ---
 
@@ -109,20 +110,26 @@ JobQuest/
 ├── src/main/java/com/jobquest/
 │   ├── 🚀 JobQuestApplication.java      # Entry point
 │   ├── config/
-│   │   └── ⚙️ WebConfig.java            # CORS & MVC config
+│   │   ├── ⚙️ WebConfig.java            # CORS & MVC config
+│   │   ├── 🔒 SecurityConfig.java       # Spring Security setup
+│   │   └── 🔑 PasswordEncoderConfig.java# BCrypt Encoder
 │   ├── controller/
 │   │   ├── 🌐 JobApplicationController.java    # Thymeleaf MVC routes
-│   │   └── 🔌 JobApplicationApiController.java # REST API endpoints
+│   │   ├── 🔌 JobApplicationApiController.java # REST API endpoints
+│   │   └── 🚪 AuthController.java              # Login & Registration
 │   ├── model/
-│   │   └── 📦 JobApplication.java        # JPA Entity
+│   │   ├── 📦 JobApplication.java        # JPA Entity (App)
+│   │   └── 👤 User.java                  # JPA Entity (User)
 │   ├── repository/
-│   │   └── 🗃️ JobApplicationRepository.java   # Spring Data JPA
+│   │   ├── 🗃️ JobApplicationRepository.java   # Spring Data JPA
+│   │   └── 🗂️ UserRepository.java             # User storage
 │   └── service/
-│       └── 🧠 JobApplicationService.java # Business logic
+│       ├── 🧠 JobApplicationService.java # Business logic  
+│       └── 🛡️ UserService.java           # Authentication logic
 │
 ├── src/main/resources/
 │   ├── application.properties            # App configuration
-│   ├── data.sql                          # Sample seed data
+│   ├── data.sql                          # Database scripts
 │   ├── static/
 │   │   ├── css/style.css                 # Custom styles
 │   │   └── js/
@@ -135,6 +142,8 @@ JobQuest/
 │       ├── form.html                     # Add/Edit form
 │       ├── kanban.html                   # Kanban board
 │       ├── analytics.html                # Analytics page
+│       ├── login.html                    # Login page
+│       ├── register.html                 # Registration page
 │       └── fragments/layout.html         # Shared layout
 │
 └── pom.xml                              # Maven dependencies
@@ -182,6 +191,7 @@ JobQuest also exposes a **REST API** for programmatic access:
 | Layer | Technology | Why? |
 |:--|:--|:--|
 | **Backend** | Spring Boot 3.2.3 | Production-grade framework with auto-configuration |
+| **Security** | Spring Security | Secure user authentication and BCrypt password encoding |
 | **Language** | Java 17 | Modern LTS with records, sealed classes, pattern matching |
 | **Database** | SQLite + Hibernate | Zero-config, portable, file-based database |
 | **Template** | Thymeleaf | Server-side rendering with natural HTML templates |
